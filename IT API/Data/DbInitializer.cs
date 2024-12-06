@@ -18,9 +18,10 @@ namespace ProductApi.Data
 
             var products = new Product[]
             {
-                new Product { Name = "Produkt 1", Price = 10.99M },
-                new Product { Name = "Produkt 2", Price = 20.99M },
-                new Product { Name = "Produkt 3", Price = 30.99M }
+                new Product { Name = "Product 1", Price = 10.99M },
+                new Product { Name = "Product 2", Price = 20.99M },
+                new Product { Name = "Product 3", Price = 30.99M },
+                new Product { Name = "Product 4", Price = 40.99M }
             };
 
             context.Products.AddRange(products);
