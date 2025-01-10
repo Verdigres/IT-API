@@ -15,11 +15,15 @@ builder.Services.AddDbContext<ProductContext>(options =>
 // Dodaj pozostałe usługi (np. CORS, Swagger)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policyBuilder =>
+    options.AddPolicy("AllowSpecificOrigin", policyBuilder =>
     {
-        policyBuilder.AllowAnyOrigin()
-                     .AllowAnyMethod()
-                     .AllowAnyHeader();
+        policyBuilder
+            .WithOrigins("http://kusiubruk.42web.io",
+                         "https://kusiubruk.42web.io",
+                         "http://localhost:5000",
+                         "http://localhost:5097")
+            .AllowAnyMethod()
+            .AllowAnyHeader();
     });
 });
 
@@ -44,24 +48,50 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Konfiguracja potoku żądań HTTP
-if (app.Environment.IsDevelopment())
+//testowe połączenie
+using (var scope = app.Services.CreateScope())
 {
-    app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ProductContext>();
+        // Test połączenia z bazą
+        if (context.Database.CanConnect())
+        {
+            Console.WriteLine("Połączenie z bazą danych nawiązane pomyślnie.");
+        }
+        else
+        {
+            Console.WriteLine("Błąd połączenia z bazą danych.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Błąd połączenia z bazą: {ex.Message}");
+    }
 }
+
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// Konfiguracja potoku żądań HTTP
+//if (app.Environment.IsDevelopment())
+//{
+    app.UseDeveloperExceptionPage();
+    
+//}
 
 app.UseRouting();
 
 //app.UseCors("AllowAll");
-app.UseCors(builder =>
-    builder.AllowAnyOrigin()
-           .AllowAnyMethod()
-           .AllowAnyHeader());
+app.UseCors("AllowSpecificOrigin");
+
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapGet("/", () => "Hello from Minimal API!");
 
 app.Run();
